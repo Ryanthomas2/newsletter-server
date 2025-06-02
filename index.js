@@ -9,6 +9,21 @@ app.use(cors());
 app.use(bodyParser.text({ type: '*/*' }));
 app.use(express.json());
 
+// Fix for Google Apps Script sending JSON as a string
+app.use((req, res, next) => {
+  if (
+    req.headers['content-type'] === 'application/json' &&
+    typeof req.body === 'string'
+  ) {
+    try {
+      req.body = JSON.parse(req.body);
+    } catch (err) {
+      console.error('JSON parse error:', err.message);
+    }
+  }
+  next();
+});
+
 // Health check
 app.get('/', (req, res) => {
   res.send('✅ Newsletter parser is up and running!');
